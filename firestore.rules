@@ -1,0 +1,70 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAuthenticated() { return request.auth != null; }
+
+    match /config/{document} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated();
+      allow delete: if isAuthenticated();
+    }
+
+    match /sekolah/{sekolahId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+
+      match /jurusan/{jurusanId} {
+        allow read: if isAuthenticated();
+        allow write: if isAuthenticated();
+
+        match /kelas/{kelasId} {
+          allow read: if isAuthenticated();
+          allow write: if isAuthenticated();
+
+          match /siswa/{siswaId} {
+            allow read: if isAuthenticated();
+            allow write: if isAuthenticated();
+
+            match /pembayaran/{pembayaranId} {
+              allow read: if isAuthenticated();
+              allow write: if isAuthenticated();
+            }
+          }
+
+          match /pengeluaran/{pengeluaranId} {
+            allow read: if isAuthenticated();
+            allow write: if isAuthenticated();
+          }
+        }
+      }
+    }
+
+    // ===== collectionGroup wildcard rules =====
+    // Dibutuhkan oleh useSafeCollectionGroup() yang dipakai Admin Dashboard,
+    // Admin Siswa, Admin Rekap Kas, dan NotificationBell.
+    // Tanpa ini, collectionGroup() query akan permission-denied.
+    match /{path=**}/kelas/{kelasId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+    match /{path=**}/siswa/{siswaId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+    match /{path=**}/pembayaran/{pembayaranId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+    match /{path=**}/pengeluaran/{pengeluaranId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+  }
+}
